@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>像素沙盒</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="/lib/phaser/phaser.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <div id="game-container"></div>
+
+  <div id="chat-overlay">
+    <div id="chat-messages"></div>
+    <input id="chat-input" type="text" placeholder="按 T 聊天" maxlength="80" autocomplete="off">
+  </div>
+
+  <div id="touch-left"></div>
+  <div id="touch-right"></div>
+  <div id="joystick-base"><div id="joystick-thumb"></div></div>
+  <div id="mobile-chat-btn">💬</div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
