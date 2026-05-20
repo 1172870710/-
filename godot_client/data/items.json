@@ -1,14 +1,14 @@
 {
   "ITEMS": {
-    "bread": { "name": "面包", "emoji": "🍞", "price": 5, "desc": "松软的白面包", "stackable": true },
-    "apple": { "name": "苹果", "emoji": "🍎", "price": 3, "desc": "红彤彤的苹果", "stackable": true },
-    "meat": { "name": "烤肉", "emoji": "🍖", "price": 12, "desc": "香喷喷的烤肉", "stackable": true },
-    "potion": { "name": "治疗药水", "emoji": "🧪", "price": 25, "desc": "恢复少量 HP", "stackable": true },
-    "flower": { "name": "野花", "emoji": "🌸", "price": 2, "desc": "一束野花", "stackable": true },
-    "gem": { "name": "宝石", "emoji": "💎", "price": 80, "desc": "闪闪发光的宝石", "stackable": true },
-    "ring": { "name": "戒指", "emoji": "💍", "price": 60, "desc": "精致的银戒指", "stackable": false },
-    "scroll": { "name": "卷轴", "emoji": "📜", "price": 40, "desc": "古老的卷轴", "stackable": false },
-    "fish": { "name": "鱼", "emoji": "🐟", "price": 8, "desc": "新鲜的鱼", "stackable": true },
-    "cloth": { "name": "布匹", "emoji": "🧶", "price": 15, "desc": "柔软的布匹", "stackable": true }
+	"bread": { "name": "面包", "emoji": "🍞", "price": 5, "desc": "松软的白面包", "stackable": true },
+	"apple": { "name": "苹果", "emoji": "🍎", "price": 3, "desc": "红彤彤的苹果", "stackable": true },
+	"meat": { "name": "烤肉", "emoji": "🍖", "price": 12, "desc": "香喷喷的烤肉", "stackable": true },
+	"potion": { "name": "治疗药水", "emoji": "🧪", "price": 25, "desc": "恢复少量 HP", "stackable": true },
+	"flower": { "name": "野花", "emoji": "🌸", "price": 2, "desc": "一束野花", "stackable": true },
+	"gem": { "name": "宝石", "emoji": "💎", "price": 80, "desc": "闪闪发光的宝石", "stackable": true },
+	"ring": { "name": "戒指", "emoji": "💍", "price": 60, "desc": "精致的银戒指", "stackable": false },
+	"scroll": { "name": "卷轴", "emoji": "📜", "price": 40, "desc": "古老的卷轴", "stackable": false },
+	"fish": { "name": "鱼", "emoji": "🐟", "price": 8, "desc": "新鲜的鱼", "stackable": true },
+	"cloth": { "name": "布匹", "emoji": "🧶", "price": 15, "desc": "柔软的布匹", "stackable": true }
   }
 }

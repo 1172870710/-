@@ -1,5 +1,6 @@
 // Phaser 游戏入口
 import GameScene from './scenes/GameScene.js';
+import ForestScene from './scenes/ForestScene.js';
 
 const config = {
   type: Phaser.AUTO,
@@ -13,7 +14,7 @@ const config = {
     width: 640,
     height: 480,
   },
-  scene: [GameScene],
+  scene: [GameScene, ForestScene],
 };
 
 const game = new Phaser.Game(config);

@@ -1,11 +1,26 @@
-const { getShopItems, getPlayerInventory } = require('../../shared/items');
+const { getShopItems, getPlayerInventory, ITEMS } = require('../../shared/items');
+
+// 从物品键列表构建商店数据（JSON 中指定 shop 时使用）
+function buildShopFromList(itemKeys) {
+  const shop = {};
+  for (const key of itemKeys) {
+    const def = ITEMS[key];
+    if (def) {
+      shop[key] = {
+        ...def,
+        stock: 1 + Math.floor(Math.random() * 5),
+      };
+    }
+  }
+  return shop;
+}
 
 class NPC {
-  constructor(id, personality, tileMap) {
-    this.id = id;
-    this.name = personality.name;
-    this.job = personality.job;
-    this.backstory = personality.backstory;
+  constructor(npcData, tileMap) {
+    this.id = npcData.id;
+    this.name = npcData.name;
+    this.job = npcData.job;
+    this.backstory = npcData.backstory;
 
     // 位置：随机可行走坐标
     const pos = tileMap.getRandomWalkable();
@@ -15,7 +30,7 @@ class NPC {
     this.moving = false;
 
     // 外观
-    this.color = '#3498db'; // NPC 统一样式（后续可个性化）
+    this.color = npcData.color || '#3498db';
 
     // 状态
     this.speed = 1;
@@ -24,12 +39,12 @@ class NPC {
     this.currentAction = 'idle';
     this.currentTarget = null;
 
-    // 商店和玩家互动
-    this.shop = getShopItems(personality.job);
-    this.gold = 10 + Math.floor(Math.random() * 30); // NPC 持有的金币
+    // 商店（JSON 指定优先，否则按职业自动生成）
+    this.shop = npcData.shop ? buildShopFromList(npcData.shop) : getShopItems(npcData.job);
+    this.gold = 10 + Math.floor(Math.random() * 30);
 
     // 战斗
-    this.maxHp = 50 + Math.floor(Math.random() * 30); // 50-80
+    this.maxHp = 50 + Math.floor(Math.random() * 30);
     this.hp = this.maxHp;
     this.lastHitTime = 0;
 

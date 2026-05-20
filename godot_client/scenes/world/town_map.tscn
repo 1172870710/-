@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://dtwnmp00001"]
+
+[ext_resource type="Script" path="res://scripts/world/town_map.gd" id="1_mapscript"]
+[ext_resource type="Script" path="res://scripts/entities/player.gd" id="2_player"]
+
+[node name="TownMap" type="TileMapLayer"]
+script = ExtResource("1_mapscript")
+
+[node name="Player" type="CharacterBody2D" parent="."]
+position = Vector2(912, 976)
+script = ExtResource("2_player")
+
+[node name="GameCamera" type="Camera2D" parent="Player"]
+current = true
+zoom = Vector2(1.0, 1.0)

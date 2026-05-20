@@ -172,6 +172,7 @@ export default class GameScene extends Phaser.Scene {
     this.keys = this.input.keyboard.addKeys({
       W: 'W', A: 'A', S: 'S', D: 'D', T: 'T', SPACE: 'SPACE',
       UP: 'UP', DOWN: 'DOWN', LEFT: 'LEFT', RIGHT: 'RIGHT',
+      F: 'F',
     });
 
     // ---- 开发者模式标记 ----
@@ -221,6 +222,14 @@ export default class GameScene extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.keys.SPACE)) {
       if (document.activeElement?.tagName !== 'INPUT' && !this._isPanelOpen()) {
         this._handleAttack();
+      }
+    }
+
+    // ---- 4. 按 F 进入森林场景 ----
+    if (Phaser.Input.Keyboard.JustDown(this.keys.F)) {
+      if (document.activeElement?.tagName !== 'INPUT') {
+        this.scene.start('ForestScene');
+        return;
       }
     }
 

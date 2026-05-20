@@ -6,3 +6,6 @@ Thumbs.db
 temp_ai_extract2/
 godot_ai_repo.zip
 mcp_proxy.py
+.godot/
+.claude/
+memory/

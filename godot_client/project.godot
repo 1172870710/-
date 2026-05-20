@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="像素沙盒"
 config/description="AI NPC 驱动的像素风沙盒多人游戏"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/world/town_map.tscn"
 config/features=PackedStringArray("4.6")
 boot_splash/bg_color=Color(0.1, 0.1, 0.15, 1)
 config/windows_native_icon="res://assets/icon.png"

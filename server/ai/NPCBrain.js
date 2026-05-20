@@ -3,15 +3,17 @@
 // 深思层（低频，30s+）：调用 LLM 制定战略方向
 
 class NPCBrain {
-  constructor(npc, personality, memory, graph, llmClient, promptBuilder, parser, executor) {
+  constructor(npc, personality, memory, ctx, internalState) {
     this.npc = npc;
-    this.personality = personality;   // 性格档案
+    this.personality = personality;   // NPC 数据（从 NPCDataLoader）
     this.memory = memory;             // MemorySystem 实例
-    this.graph = graph;               // RelationshipGraph（全局共享）
-    this.llm = llmClient;             // LLMClient 实例
-    this.promptBuilder = promptBuilder;
-    this.parser = parser;
-    this.executor = executor;
+    // 服务上下文（从 GameWorld.serviceContext 注入）
+    this.graph = ctx.graph;           // RelationshipGraph
+    this.llm = ctx.llm;               // LLMClient
+    this.promptBuilder = ctx.prompt;  // PromptBuilder
+    this.parser = ctx.parser;         // DecisionParser
+    this.executor = ctx.executor;     // BehaviorExecutor
+    this.internalState = internalState || null; // NPCInternalState 实例
 
     this.lastReactiveTick = 0;
     this.reactiveInterval = 500;      // 500ms
@@ -40,6 +42,12 @@ class NPCBrain {
     if (now - this.lastReactiveTick < this.reactiveInterval) return;
     this.lastReactiveTick = now;
 
+    // 0. 内心状态更新（压力、欲望等）
+    if (this.internalState) {
+      const ctx = this._buildSocialContext(world);
+      this.internalState.tick(ctx);
+    }
+
     // 1. 紧急避险：附近有人 attack 且 fear > 0.6
     const threat = this._findNearbyAttacker(world);
     if (threat && this.personality.mood.fear > 0.6) {
@@ -53,10 +61,19 @@ class NPCBrain {
       };
     }
 
-    // 2. 执行当前决策
+    // 2. 心理状态影响决策：高压下更激进
+    if (this.internalState && this.internalState.isAtLeast('BREAKDOWN')) {
+      // 崩溃状态：可能随机切换为攻击
+      if (Math.random() < 0.1 && this.currentDecision.target) {
+        this.currentDecision.action = 'attack';
+        this.currentDecision.reasoning = '心理崩溃，失控攻击';
+      }
+    }
+
+    // 3. 执行当前决策
     this.executor.execute(this.npc, this.currentDecision, world);
 
-    // 3. 简单的情绪衰减
+    // 4. 简单的情绪衰减
     this._decayMood();
   }
 
@@ -72,7 +89,8 @@ class NPCBrain {
       this.personality,
       this.memory,
       this.graph,
-      world
+      world,
+      this.internalState
     );
 
     console.log(`  🧠 ${this.npc.name} 正在深思...`);
@@ -133,6 +151,8 @@ class NPCBrain {
     // 增加惊讶
     this.personality.mood.surprise = Math.min(1, this.personality.mood.surprise + 0.3);
 
+    if (this.internalState) this.internalState.onSocialInteraction(fromName, true);
+
     // 如果有 LLM API，立即触发一次深思（响应对话）
     // 但前提是距离上次深思已超过 15 秒
     // 此处标记为"想要立即思考"，由调度器判断
@@ -151,9 +171,11 @@ class NPCBrain {
     this.personality.mood.happiness = Math.max(0, this.personality.mood.happiness - 0.4);
 
     this.graph.adjust(this.npc.id, attackerId,
-      { trust: -0.4, affection: -0.5, fear: +0.4 },
+      { trust: -0.4, affection: -0.5, fear: +0.4, resentment: +0.3, suspicion: +0.1 },
       `${attackerName} 攻击了我`
     );
+
+    if (this.internalState) this.internalState.onAttacked(attackerName);
   }
 
   // 有人送礼物
@@ -168,12 +190,49 @@ class NPCBrain {
     this.personality.mood.surprise = Math.min(1, this.personality.mood.surprise + 0.5);
 
     this.graph.adjust(this.npc.id, fromId,
-      { trust: +0.2, affection: +0.3 },
+      { trust: +0.2, affection: +0.3, debt: +0.15 },
       `送了我 ${item}`
     );
+
+    if (this.internalState) this.internalState.onReceivedGift();
   }
 
   // ========== 内部辅助 ==========
+
+  /** 构建社交上下文（用于压力计算） */
+  _buildSocialContext(world) {
+    let nearTrusted = false;
+    let isolated = true;
+    let nearEnemy = false;
+    let maxDebt = 0;
+
+    for (const [, other] of world.npcs) {
+      if (other.id === this.npc.id) continue;
+      const dx = other.x - this.npc.x;
+      const dy = other.y - this.npc.y;
+      if (Math.sqrt(dx * dx + dy * dy) < 80) {
+        isolated = false;
+        const rel = this.graph.getAttitude(this.npc.id, other.id);
+        if (rel.trust > 0.5) nearTrusted = true;
+        if (rel.resentment > 0.5 || rel.trust < -0.3) nearEnemy = true;
+        if (rel.debt > maxDebt) maxDebt = rel.debt;
+      }
+    }
+
+    // 也检查附近的玩家
+    for (const [, player] of world.players) {
+      const dx = player.x - this.npc.x;
+      const dy = player.y - this.npc.y;
+      if (Math.sqrt(dx * dx + dy * dy) < 80) {
+        isolated = false;
+        const rel = this.graph.getAttitude(this.npc.id, player.id);
+        if (rel.trust > 0.5) nearTrusted = true;
+        if (rel.resentment > 0.5) nearEnemy = true;
+      }
+    }
+
+    return { nearTrusted, isolated, nearEnemy, debtLevel: maxDebt };
+  }
 
   _findNearbyAttacker(world) {
     for (const [, npc] of world.npcs) {
@@ -214,6 +273,7 @@ class NPCBrain {
 
     const mem = this.memory.getRecentForPrompt(10);
     const relScores = this.graph.getAttitude(this.npc.id, fromName);
+    const relState = this.graph.getRelationState(this.npc.id, fromName);
 
     const prompt = `你叫${this.npc.name}，职业是${this.personality.job}。${this.personality.backstory}。
 
@@ -221,7 +281,7 @@ class NPCBrain {
 
 你现在的心情：${this.npc.emotion}（快乐${pct(this.personality.mood.happiness)}，愤怒${pct(this.personality.mood.anger)}，恐惧${pct(this.personality.mood.fear)}）。
 
-${mem.story ? '你的人生经历：\n' + mem.story + '\n\n' : ''}${mem.events.length ? '最近发生的事：\n' + mem.events.map(m => '· ' + m.content).join('\n') + '\n\n' : ''}你对${fromName}的观感：信任${pct(relScores.trust)}，好感${pct(relScores.affection)}。
+${mem.story ? '你的人生经历：\n' + mem.story + '\n\n' : ''}${mem.events.length ? '最近发生的事：\n' + mem.events.map(m => '· ' + m.content).join('\n') + '\n\n' : ''}你对${fromName}的观感（${relState.label}）：信任${pct(relScores.trust)}，好感${pct(relScores.affection)}，尊敬${pct(relScores.respect)}，恐惧${pct(relScores.fear)}，嫉妒${pct(relScores.jealousy)}，怨恨${pct(relScores.resentment)}，亏欠${pct(relScores.debt)}，怀疑${pct(relScores.suspicion)}。
 
 ${fromName}对你说："${text}"
 请用你的身份和当前心情回复ta。要简短自然，符合角色设定，不要加引号。`;

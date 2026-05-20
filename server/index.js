@@ -1,99 +1,93 @@
 require('dotenv').config();
-const express = require('express');
-const http = require('http');
-const path = require('path');
-const { Server } = require('socket.io');
-const TileMap = require('./game/TileMap');
-const GameWorld = require('./game/GameWorld');
-const SocketHandler = require('./network/SocketHandler');
-const WebSocketHandler = require('./network/WebSocketHandler');
+const express   = require('express');
+const http      = require('http');
+const path      = require('path');
+const TileMap   = require('./world/TileMap');
+const GameWorld = require('./world/GameWorld');
+const WorldState = require('./world/WorldState');
+const { bus, EVENTS }  = require('./core/EventBus');
+const TimeManager      = require('./core/TimeManager');
+const SaveManager      = require('./core/SaveManager');
+const GameLoop         = require('./core/GameLoop');
+const MessageRouter    = require('./network/MessageRouter');
+const WebSocketServer  = require('./network/WebSocketServer');
 
-const PORT = process.env.PORT || 3000;
-const WS_PORT = parseInt(process.env.WS_PORT) || 3002;
-const NPC_COUNT = parseInt(process.env.NPC_COUNT) || 8;
+const HTTP_PORT = parseInt(process.env.PORT)      || 3001;
+const WS_PORT   = parseInt(process.env.WS_PORT)    || 3002;
 
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  /* 保持默认 transports，允许 polling 降级 */
+// ======================== 游戏世界 ========================
+const tileMap    = new TileMap();
+const gameWorld  = new GameWorld(tileMap);
+const worldState = new WorldState(gameWorld);
+
+// ======================== 时间系统 ========================
+const timeManager = new TimeManager(bus, {
+  speed: parseFloat(process.env.TIME_SPEED) || 1,
 });
 
-// 静态文件
+// ======================== 存档系统 ========================
+const saveManager = new SaveManager();
+saveManager.init(gameWorld, timeManager);
+saveManager.enableAutoSave(bus, EVENTS);
+
+// ======================== WebSocket ========================
+const router   = new MessageRouter(gameWorld);
+const wsServer = new WebSocketServer(router, WS_PORT);
+
+// ======================== 时间事件 ========================
+// （未来 NPCScheduler / DramaEngine 会接管这些监听）
+
+bus.on(EVENTS.TIME_HOUR_CHANGED, (data) => {
+  router.broadcast('time-update', timeManager.toSnapshot());
+});
+
+bus.on(EVENTS.TIME_DAY_CHANGED, (data) => {
+  console.log(`  📅 ${timeManager.dateString}`);
+});
+
+bus.on(EVENTS.TIME_SEASON_CHANGED, (data) => {
+  const seasonCn = data.season === 'spring' ? '春' : data.season === 'summer' ? '夏' : data.season === 'fall' ? '秋' : '冬';
+  console.log(`  🍂 进入${seasonCn}季`);
+  router.broadcast('season-changed', { season: data.season, day: data.day, year: data.year });
+});
+
+bus.on(EVENTS.PLAYER_LEFT, (data) => {
+  saveManager.savePlayer(data.playerId);
+});
+
+// ======================== 游戏循环 ========================
+const gameLoop = new GameLoop({
+  world: gameWorld, timeManager, router,
+});
+gameLoop.start();
+
+// ======================== HTTP ========================
+const app    = express();
+const server = http.createServer(app);
+
 app.use(express.static(path.join(__dirname, '..', 'client')));
 app.use('/shared', express.static(path.join(__dirname, '..', 'shared')));
 app.use('/lib/phaser', express.static(path.join(__dirname, '..', 'node_modules', 'phaser', 'dist')));
 
-// 游戏世界初始化
-const tileMap = new TileMap();
-const gameWorld = new GameWorld(tileMap, NPC_COUNT);
-const socketHandler = new SocketHandler(io, gameWorld);
-const wsHandler = new WebSocketHandler(gameWorld, WS_PORT);
-
-// 调试接口
 app.get('/debug', (req, res) => {
   res.json({
-    players: gameWorld.getPlayerSnapshots(),
-    playerCount: gameWorld.players.size,
-    npcs: gameWorld.getNPCSnapshots(),
-    npcCount: gameWorld.npcs.size,
-    map: {
-      width: tileMap.width,
-      height: tileMap.height,
-      tileSize: tileMap.tileSize,
-    },
-    llm: gameWorld.getLLMStats(),
+    players:     worldState.getPlayerSnapshots(),
+    playerCount: worldState.getPlayerCount(),
+    npcs:        worldState.getNPCSnapshots(),
+    npcCount:    worldState.getNPCCount(),
+    map:         { width: tileMap.width, height: tileMap.height, tileSize: tileMap.tileSize },
+    connections: wsServer.connectionCount,
+    time:        timeManager.toSnapshot(),
+    llm:         worldState.getLLMStats(),
   });
 });
 
-// 游戏循环
-const GAME_TICK = 1000 / 30; // 30 tick/秒
-setInterval(() => {
-  // 1. NPC 反应层更新
-  gameWorld.tickNPCs();
-
-  // 2. 广播世界状态（玩家 + NPC）
-  socketHandler.broadcastState();
-  wsHandler.broadcastState();
-
-  // 3. 收集并广播 NPC 对话
-  const dialogues = gameWorld.collectNPCDialogues();
-  for (const d of dialogues) {
-    socketHandler.broadcastNPCDialogue(d);
-    wsHandler.broadcastNPCDialogue(d);
-  }
-}, GAME_TICK);
-
-// NPC 深思循环（独立，不阻塞游戏 Tick）
-setInterval(() => {
-  gameWorld.tickNPCThink();
-}, 3000); // 每 3 秒检查一次是否有 NPC 可以深思
-
-server.listen(PORT, () => {
-  console.log(`游戏服务已启动: http://localhost:${PORT}`);
-  const ips = getLocalIPs();
-  ips.forEach(ip => console.log(`  局域网: http://${ip}:${PORT}`));
-  console.log(`  调试页面: http://localhost:${PORT}/debug`);
+// ======================== 启动 ========================
+server.listen(HTTP_PORT, () => {
+  console.log(`\n  像素沙盒 服务已启动`);
+  console.log(`  HTTP:       http://localhost:${HTTP_PORT}`);
+  console.log(`  WebSocket:  ws://localhost:${WS_PORT}`);
+  console.log(`  调试页面:   http://localhost:${HTTP_PORT}/debug`);
+  console.log(`  ${timeManager.dateString} ${timeManager.timeString}（${timeManager.speed}x 流速）`);
+  console.log(`  已加载 ${gameWorld.npcs.size} 个 NPC\n`);
 });
-
-// 获取所有局域网 IP
-function getLocalIPs() {
-  const { networkInterfaces } = require('os');
-  const nets = networkInterfaces();
-  const addrs = [];
-  for (const [name, ifs] of Object.entries(nets)) {
-    for (const net of ifs) {
-      if (net.family === 'IPv4' && !net.internal) {
-        if (/radmin|vpn|virtual|vmware|hyper-v|loopback|bluetooth/i.test(name)) continue;
-        addrs.push({ name, addr: net.address });
-      }
-    }
-  }
-  addrs.sort((a, b) => {
-    const aWifi = /wlan|wi-?fi|无线/i.test(a.name);
-    const bWifi = /wlan|wi-?fi|无线/i.test(b.name);
-    if (aWifi && !bWifi) return -1;
-    if (!aWifi && bWifi) return 1;
-    return 0;
-  });
-  return addrs.map(a => a.addr);
-}

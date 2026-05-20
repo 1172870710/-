@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://ohl7v8iuns1r"]
+
+[node name="NewTest" type="Node3D" unique_id=565047889]
+
+[node name="TestCube" type="MeshInstance3D" parent="." unique_id=1254307437]

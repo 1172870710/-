@@ -1,0 +1,180 @@
+[
+  {
+    "id": "npc_0",
+    "name": "老强",
+    "title": "铁匠铺老板",
+    "gender": "男",
+    "age": 42,
+    "job": "铁匠",
+    "backstory": "曾经是个士兵，战争结束后回乡谋生",
+    "color": "#c0392b",
+    "traits": {
+      "openness": 0.1,
+      "conscientiousness": 0.33,
+      "extraversion": 0.66,
+      "agreeableness": 0.81,
+      "neuroticism": 0.75
+    },
+    "shop": ["ring", "gem", "meat"],
+    "relationships": {
+      "npc_1": { "trust": 0.5, "respect": 0.6 },
+      "npc_6": { "trust": 0.6, "affection": 0.4 }
+    }
+  },
+  {
+    "id": "npc_1",
+    "name": "小娜",
+    "title": "面包师",
+    "gender": "女",
+    "age": 26,
+    "job": "面包师",
+    "backstory": "沉默寡言，有一段不为人知的过往",
+    "color": "#e67e22",
+    "traits": {
+      "openness": 0.3,
+      "conscientiousness": 0.18,
+      "extraversion": 0.58,
+      "agreeableness": 0.22,
+      "neuroticism": 0.55
+    },
+    "shop": ["bread", "apple", "cloth"],
+    "relationships": {
+      "npc_3": { "trust": 0.3, "affection": 0.2 },
+      "npc_2": { "trust": 0.1 }
+    }
+  },
+  {
+    "id": "npc_2",
+    "name": "阿超",
+    "title": "农夫",
+    "gender": "男",
+    "age": 35,
+    "job": "农民",
+    "backstory": "爱管闲事，镇子里没有他不知道的秘密",
+    "color": "#27ae60",
+    "traits": {
+      "openness": 0.12,
+      "conscientiousness": 0.59,
+      "extraversion": 0.43,
+      "agreeableness": 0.87,
+      "neuroticism": 0.56
+    },
+    "shop": ["bread", "apple", "flower"],
+    "relationships": {
+      "npc_0": { "trust": 0.4, "affection": 0.3 },
+      "npc_1": { "trust": 0.5, "jealousy": 0.2 },
+      "npc_7": { "trust": 0.3 }
+    }
+  },
+  {
+    "id": "npc_3",
+    "name": "美",
+    "title": "商人",
+    "gender": "女",
+    "age": 30,
+    "job": "商人",
+    "backstory": "年轻时失去爱人，至今未嫁",
+    "color": "#8e44ad",
+    "traits": {
+      "openness": 0.48,
+      "conscientiousness": 0.86,
+      "extraversion": 0.23,
+      "agreeableness": 0.24,
+      "neuroticism": 0.34
+    },
+    "relationships": {
+      "npc_4": { "trust": 0.2, "debt": 0.4 },
+      "npc_6": { "trust": 0.6 }
+    }
+  },
+  {
+    "id": "npc_4",
+    "name": "涛",
+    "title": "猎人",
+    "gender": "男",
+    "age": 38,
+    "job": "猎人",
+    "backstory": "年轻时被背叛过，对人不信任",
+    "color": "#16a085",
+    "traits": {
+      "openness": 0.66,
+      "conscientiousness": 0.23,
+      "extraversion": 0.27,
+      "agreeableness": 0.57,
+      "neuroticism": 0.28
+    },
+    "shop": ["meat", "fish", "cloth"],
+    "relationships": {
+      "npc_0": { "trust": 0.5, "respect": 0.7 },
+      "npc_7": { "trust": 0.4, "suspicion": 0.3 }
+    }
+  },
+  {
+    "id": "npc_5",
+    "name": "雪",
+    "title": "药师",
+    "gender": "女",
+    "age": 29,
+    "job": "药师",
+    "backstory": "祖传的草药配方，但她总想找到没人见过的药材",
+    "traits": {
+      "openness": 0.7,
+      "conscientiousness": 0.11,
+      "extraversion": 0.74,
+      "agreeableness": 0.39,
+      "neuroticism": 0.24
+    },
+    "shop": ["potion", "scroll", "flower"],
+    "relationships": {
+      "npc_0": { "trust": 0.4, "respect": 0.5 },
+      "npc_1": { "trust": 0.3, "affection": 0.4 },
+      "npc_4": { "trust": 0.2 }
+    }
+  },
+  {
+    "id": "npc_6",
+    "name": "老龙",
+    "title": "酒馆老板",
+    "gender": "男",
+    "age": 55,
+    "job": "酒馆老板",
+    "backstory": "沉默寡言，有一段不为人知的过往",
+    "color": "#d35400",
+    "traits": {
+      "openness": 0.11,
+      "conscientiousness": 0.26,
+      "extraversion": 0.51,
+      "agreeableness": 0.69,
+      "neuroticism": 0.27
+    },
+    "shop": ["meat", "bread", "apple", "fish"],
+    "relationships": {
+      "npc_0": { "trust": 0.7, "affection": 0.5 },
+      "npc_3": { "trust": 0.6 },
+      "npc_2": { "trust": 0.5, "respect": 0.4 }
+    }
+  },
+  {
+    "id": "npc_7",
+    "name": "小静",
+    "title": "守卫队长",
+    "gender": "女",
+    "age": 33,
+    "job": "守卫",
+    "backstory": "曾目睹惨案而立誓守护正义，但手段冷酷常遭人非议",
+    "color": "#2c3e50",
+    "traits": {
+      "openness": 0.72,
+      "conscientiousness": 0.28,
+      "extraversion": 0.62,
+      "agreeableness": 0.11,
+      "neuroticism": 0.82
+    },
+    "shop": ["meat", "bread"],
+    "relationships": {
+      "npc_0": { "trust": 0.6, "respect": 0.8 },
+      "npc_4": { "trust": 0.4 },
+      "npc_2": { "trust": 0.3, "suspicion": 0.2 }
+    }
+  }
+]
