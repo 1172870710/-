@@ -7,6 +7,8 @@ class PromptBuilder {
     const innerText = this._formatInternalState(internalState);
     const psychGuidance = this._formatPsychGuidance(internalState);
 
+    const styleBlock = this._formatSpeakingStyle(personality);
+
     return '你是一个游戏 NPC，请根据你的性格、记忆和当前处境做出决策。\n' +
       '\n' +
       '【你的身份】\n' +
@@ -15,6 +17,7 @@ class PromptBuilder {
       '性格：开放性 ' + f(personality.traits.openness) + '，尽责性 ' + f(personality.traits.conscientiousness) + '，外向性 ' + f(personality.traits.extraversion) + '，宜人性 ' + f(personality.traits.agreeableness) + '，神经质 ' + f(personality.traits.neuroticism) + '\n' +
       '攻击性 ' + f(personality.decisionStyle.aggression) + '，贪婪度 ' + f(personality.decisionStyle.greed) + '，忠诚度 ' + f(personality.decisionStyle.loyalty) + '，好奇心 ' + f(personality.decisionStyle.curiosity) + '\n' +
       '背景：' + personality.backstory + '\n' +
+      styleBlock +
       '\n' +
       '【你的当前状态】\n' +
       '情绪：快乐 ' + f(personality.mood.happiness) + '，愤怒 ' + f(personality.mood.anger) + '，恐惧 ' + f(personality.mood.fear) + '，惊讶 ' + f(personality.mood.surprise) + '\n' +
@@ -55,6 +58,26 @@ class PromptBuilder {
       psychGuidance +
       '- 你的行为要符合身份和性格，不要说出现代词汇\n' +
       '- 这是一个中世纪奇幻世界，没有现代科技';
+  }
+
+  /** 格式化说话风格为 prompt 片段 */
+  _formatSpeakingStyle(personality) {
+    const style = personality.speaking_style;
+    if (!style || !style.tone) return '';
+
+    let block = '\n【你的说话风格】\n';
+    block += '- 语调：' + style.tone + '\n';
+    block += '- 说话习惯：' + style.sentence_pattern + '\n';
+    if (style.particles && style.particles.length > 0) {
+      block += '- 你常挂在嘴边的语气词：' + style.particles.join('、') + '\n';
+    }
+    if (personality.catchphrases && personality.catchphrases.length > 0) {
+      block += '- 你常说的话（但不一定每句都说，只是你的风格参考）：\n';
+      personality.catchphrases.forEach(function(c) {
+        block += '  · "' + c + '"\n';
+      });
+    }
+    return block;
   }
 
   // 能看到谁

@@ -42,6 +42,7 @@ var _system_prompt: String = ""
 var _speech_bg: ColorRect
 var _speech_label: Label
 var _prompt_label: Label
+var _name_label: Label
 
 # 输入 UI（屏幕空间 CanvasLayer，始终在最上层）
 var _input_canvas: CanvasLayer
@@ -116,6 +117,16 @@ func _setup_ui() -> void:
 	_prompt_label.visible = false
 	add_child(_prompt_label)
 
+	_name_label = Label.new()
+	_name_label.position = Vector2(-80, -90)
+	_name_label.size = Vector2(160, 30)
+	_name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_name_label.add_theme_color_override("font_color", Color(1, 1, 1))
+	_name_label.add_theme_font_size_override("font_size", 22)
+	_name_label.text = name
+	_name_label.visible = false
+	add_child(_name_label)
+
 func _setup_http() -> void:
 	_http = HTTPRequest.new()
 	_http.name = "HTTPRequest"
@@ -129,8 +140,9 @@ func _setup_http() -> void:
 # ============================
 
 func _physics_process(delta: float) -> void:
-	# 提示文字：仅当玩家在范围内且不在对话中才显示
+	# 提示文字 + NPC名字：仅当玩家在范围内且不在对话中才显示
 	_prompt_label.visible = _player_in_range and _dialog_state == DialogState.NONE
+	_name_label.visible = _player_in_range and _dialog_state == DialogState.NONE
 
 	# 对话进行中 → NPC 原地不动
 	if _dialog_state != DialogState.NONE:

@@ -1,6 +1,7 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://bgfuyskgr0sff"]
 
-[ext_resource type="Script" path="res://scripts/entities/npc.gd" id="1"]
+[ext_resource type="Script" uid="uid://cnhyap060f6kq" path="res://scripts/entities/npc.gd" id="1"]
 
-[node name="NPC" type="CharacterBody2D"]
+[node name="NPC" type="CharacterBody2D" unique_id=460383159]
+position = Vector2(628, 459)
 script = ExtResource("1")

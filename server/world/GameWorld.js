@@ -10,6 +10,12 @@ const DecisionParser = require('../ai/DecisionParser');
 const BehaviorExecutor = require('../ai/BehaviorExecutor');
 const NPCBrain = require('../ai/NPCBrain');
 const { NPCInternalState } = require('../social/NPCInternalState');
+const { EventImpactSystem } = require('../social/EventImpactSystem');
+const { BehaviorResponse } = require('../social/BehaviorResponse');
+const { ScheduleSystem } = require('../social/ScheduleSystem');
+const { SecretSystem } = require('../social/SecretSystem');
+const { EventChain } = require('../social/EventChain');
+const { DramaEngine } = require('../social/DramaEngine');
 const CombatSystem = require('../combat/CombatSystem');
 const ShopManager = require('../economy/ShopManager');
 const GiftSystem = require('../economy/GiftSystem');
@@ -47,17 +53,62 @@ class GameWorld {
     this.shop   = new ShopManager(subSystemOpts);
     this.gift   = new GiftSystem(subSystemOpts);
 
+    // 事件冲击系统（Phase 1）
+    this.eventImpactSystem = new EventImpactSystem({
+      graph: this.relationshipGraph,
+      internalStates: this.npcInternalStates,
+    });
+
+    // 行为响应系统（Phase 2）
+    this.behaviorResponse = new BehaviorResponse();
+
+    // 日程系统（Phase 3）
+    this.scheduleSystem = new ScheduleSystem();
+
+    // 秘密系统（Phase 4）
+    this.secretSystem = new SecretSystem({
+      graph: this.relationshipGraph,
+      internalStates: this.npcInternalStates,
+    });
+
+    // 事件涟漪传播（Phase 5 — 创建后注入，因为需要 npcBrains 引用）
+    this.eventChain = new EventChain({
+      graph: this.relationshipGraph,
+      impactSystem: this.eventImpactSystem,
+      npcBrains: this.npcBrains,
+    });
+
     // AI 服务上下文（注入给 NPCBrain，减少参数）
     this.serviceContext = {
-      graph:     this.relationshipGraph,
-      llm:       this.llmClient,
-      prompt:    this.promptBuilder,
-      parser:    this.decisionParser,
-      executor:  this.behaviorExecutor,
+      graph:             this.relationshipGraph,
+      llm:               this.llmClient,
+      prompt:            this.promptBuilder,
+      parser:            this.decisionParser,
+      executor:          this.behaviorExecutor,
+      impactSystem:      this.eventImpactSystem,
+      behaviorResponse:  this.behaviorResponse,
+      scheduleSystem:    this.scheduleSystem,
+      secretSystem:      this.secretSystem,
+      eventChain:        this.eventChain,
     };
 
     // 从 npcs.json 加载预设 NPC
     this._spawnNPCs();
+
+    // 戏剧引擎（Phase 6 — 在 _spawnNPCs 之后，需要 npcBrains）
+    this.dramaEngine = new DramaEngine({
+      graph: this.relationshipGraph,
+      internalStates: this.npcInternalStates,
+      secretSystem: this.secretSystem,
+      scheduleSystem: this.scheduleSystem,
+      impactSystem: this.eventImpactSystem,
+      behaviorResponse: this.behaviorResponse,
+      eventChain: this.eventChain,
+      npcBrains: this.npcBrains,
+      npcs: this.npcs,
+      llmClient: this.llmClient,
+      intervalMs: 300000, // 5 分钟
+    });
   }
 
   // 从数据文件加载并创建 NPC
@@ -109,8 +160,13 @@ class GameWorld {
       const extraStr = extras.length ? `（${extras.join('，')}）` : '';
       console.log(`  NPC: ${data.name}${extraStr} — ${data.job} — ${data.backstory}`);
     }
+    // 第四遍：注册 NPC 到日程系统
+    for (const [, npc] of this.npcs) {
+      this.scheduleSystem.registerNPC(npc.id, { x: npc.x, y: npc.y });
+    }
+
     const count = npcList.length;
-    console.log(`  已加载 ${count} 个 NPC${this.llmClient ? '（LLM 已启用）' : '（LLM 未配置，使用随机行为）'}`);
+    console.log(`  已加载 ${count} 个 NPC${this.llmClient ? '（LLM 已启用）' : '（LLM 未配置，使用随机行为）'}（含日程系统）`);
   }
 
   // 添加玩家
@@ -187,9 +243,18 @@ class GameWorld {
     for (const player of this.players.values()) {
       player.regenTick();
     }
+    // 日程系统定期清理过期覆写（每 ~3s）
+    this._scheduleTickCounter = (this._scheduleTickCounter || 0) + 1;
+    if (this._scheduleTickCounter % 90 === 0) { // 30fps * 3s
+      this.scheduleSystem.tick();
+    }
+    // 秘密系统定期传播扫描（每 ~60s）
+    if (this._scheduleTickCounter % 1800 === 0) { // 30fps * 60s
+      this.secretSystem.propagateTick();
+    }
   }
 
-  // 异步：NPC 深思（不阻塞游戏循环）
+  // 异步：NPC 深思 + 戏剧引擎（不阻塞游戏循环）
   async tickNPCThink() {
     // 没有玩家在线时，不做 LLM 思考（省 token）
     if (this.players.size === 0) return;
@@ -198,6 +263,8 @@ class GameWorld {
     for (const [npcId, brain] of this.npcBrains) {
       promises.push(brain.tryDeliberativeThink(this));
     }
+    // 戏剧引擎扫描（可能触发 LLM 生成事件）
+    promises.push(this.dramaEngine.tick());
     await Promise.allSettled(promises);
   }
 

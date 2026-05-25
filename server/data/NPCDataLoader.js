@@ -99,6 +99,19 @@ function loadNPCData() {
       // 商店和关系
       shop: entry.shop || null,          // null → 由 NPC.js 用 getShopItems(job) 自动生成
       relationships: entry.relationships || {},
+
+      // 切片人格系统
+      slice: entry.slice || {
+        archetype: '未定义切片',
+        id: 'A',
+        variable_dimensions: {},
+      },
+      speaking_style: entry.speaking_style || {
+        tone: '普通',
+        sentence_pattern: '普通陈述句',
+        particles: [],
+      },
+      catchphrases: entry.catchphrases || [],
     };
   });
 }

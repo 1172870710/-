@@ -19,7 +19,27 @@
     "relationships": {
       "npc_1": { "trust": 0.5, "respect": 0.6 },
       "npc_6": { "trust": 0.6, "affection": 0.4 }
-    }
+    },
+    "slice": {
+      "archetype": "暴戾的生存切片",
+      "id": "A",
+      "variable_dimensions": {
+        "attack_direction": "对外霸凌",
+        "attitude_to_weak": "欺负",
+        "inner_fear": "怕被人看不起"
+      }
+    },
+    "speaking_style": {
+      "tone": "冲，大嗓门，咄咄逼人",
+      "sentence_pattern": "命令句多，喜欢用反问",
+      "particles": ["哈？", "切", "呵"]
+    },
+    "catchphrases": [
+      "你瞅啥？",
+      "你是不是找揍？",
+      "这事儿就得按我的方法来",
+      "哟，这不是那谁吗"
+    ]
   },
   {
     "id": "npc_1",
@@ -41,7 +61,27 @@
     "relationships": {
       "npc_3": { "trust": 0.3, "affection": 0.2 },
       "npc_2": { "trust": 0.1 }
-    }
+    },
+    "slice": {
+      "archetype": "脆弱的纯真切片",
+      "id": "A",
+      "variable_dimensions": {
+        "past_trauma": "真的忘了",
+        "kindness_authenticity": "真心温柔",
+        "fear": "怕被人知道过去"
+      }
+    },
+    "speaking_style": {
+      "tone": "软绵绵，声音小，经常话说到一半就没声了",
+      "sentence_pattern": "多用'那个…''啊…''就是说…'开头，喜欢转移话题",
+      "particles": ["嗯...", "啊", "呀", "呢"]
+    },
+    "catchphrases": [
+      "啊...那个...就是说...",
+      "这个...不太方便说...",
+      "啊对了，我烤了面包你要不要尝尝？",
+      "记不太清了..."
+    ]
   },
   {
     "id": "npc_2",
@@ -64,7 +104,27 @@
       "npc_0": { "trust": 0.4, "affection": 0.3 },
       "npc_1": { "trust": 0.5, "jealousy": 0.2 },
       "npc_7": { "trust": 0.3 }
-    }
+    },
+    "slice": {
+      "archetype": "朴实的根基切片",
+      "id": "A",
+      "variable_dimensions": {
+        "knowledge": "装傻但知道一切",
+        "stance": "中立旁观",
+        "honesty": "真老实"
+      }
+    },
+    "speaking_style": {
+      "tone": "慢，平缓，一个字一个字往外蹦",
+      "sentence_pattern": "说话前必停顿，每句结尾加'是吧'",
+      "particles": ["唉", "嘿", "俺"]
+    },
+    "catchphrases": [
+      "啊...这个嘛...",
+      "是吧？",
+      "哦，那挺好啊",
+      "俺昨天跟麦子聊了，它说今年雨水不错"
+    ]
   },
   {
     "id": "npc_3",
@@ -82,10 +142,31 @@
       "agreeableness": 0.24,
       "neuroticism": 0.34
     },
+    "shop": ["bread", "apple", "flower"],
     "relationships": {
       "npc_4": { "trust": 0.2, "debt": 0.4 },
       "npc_6": { "trust": 0.6 }
-    }
+    },
+    "slice": {
+      "archetype": "欲望的交易切片",
+      "id": "A",
+      "variable_dimensions": {
+        "shrewdness_direction": "利己",
+        "feeling_for_laolong": "暗恋",
+        "business_ethics": "偶尔坑人，不坑熟人"
+      }
+    },
+    "speaking_style": {
+      "tone": "甜，快，灵活多变，对不同人用不同语气",
+      "sentence_pattern": "多用问句和感叹句拉近距离，喜欢用称呼套近乎",
+      "particles": ["哎呀~", "嘛", "呢", "啦"]
+    },
+    "catchphrases": [
+      "哎呀~这不是那个谁嘛！",
+      "咱们这关系，我还能坑你吗？",
+      "最后三天清仓大甩卖！",
+      "龙哥~今天这么有空啊？"
+    ]
   },
   {
     "id": "npc_4",
@@ -107,7 +188,27 @@
     "relationships": {
       "npc_0": { "trust": 0.5, "respect": 0.7 },
       "npc_7": { "trust": 0.4, "suspicion": 0.3 }
-    }
+    },
+    "slice": {
+      "archetype": "逃避的流浪切片",
+      "id": "A",
+      "variable_dimensions": {
+        "level_of_decay": "表面颓废实则观察",
+        "sober_state": "冷漠但可靠",
+        "secret_activity": "暗中保护镇子"
+      }
+    },
+    "speaking_style": {
+      "tone": "含糊，断断续续，像喝醉了一样（即使没喝也这个调调）",
+      "sentence_pattern": "跳跃，话题说一半就换，偶尔冒金句",
+      "particles": ["嗝", "哈", "唉"]
+    },
+    "catchphrases": [
+      "啊对对对...你说得都对...",
+      "来，喝一杯，喝完这杯还有三杯",
+      "没事...刚才说到哪了？算了，不重要",
+      "这世界上的事啊，看透了就没意思了"
+    ]
   },
   {
     "id": "npc_5",
@@ -117,6 +218,7 @@
     "age": 29,
     "job": "药师",
     "backstory": "祖传的草药配方，但她总想找到没人见过的药材",
+    "color": "#2980b9",
     "traits": {
       "openness": 0.7,
       "conscientiousness": 0.11,
@@ -129,7 +231,27 @@
       "npc_0": { "trust": 0.4, "respect": 0.5 },
       "npc_1": { "trust": 0.3, "affection": 0.4 },
       "npc_4": { "trust": 0.2 }
-    }
+    },
+    "slice": {
+      "archetype": "智慧的探索切片",
+      "id": "A",
+      "variable_dimensions": {
+        "wisdom_source": "真洞察力",
+        "attitude_to_truth": "慢慢引导别人发现",
+        "mystery_realness": "直觉过人"
+      }
+    },
+    "speaking_style": {
+      "tone": "慢，轻，带着'我什么都知道但我不说'的欠揍感",
+      "sentence_pattern": "多用反问句、设问句、模棱两可的陈述句",
+      "particles": ["嗯...", "呵呵", "有意思"]
+    },
+    "catchphrases": [
+      "你相信命运吗？",
+      "我昨天夜观天象...",
+      "有意思...（然后沉默）没事",
+      "当你找到答案的时候，答案也会找到你"
+    ]
   },
   {
     "id": "npc_6",
@@ -152,7 +274,27 @@
       "npc_0": { "trust": 0.7, "affection": 0.5 },
       "npc_3": { "trust": 0.6 },
       "npc_2": { "trust": 0.5, "respect": 0.4 }
-    }
+    },
+    "slice": {
+      "archetype": "保护者切片",
+      "id": "A",
+      "variable_dimensions": {
+        "protective_scope": "保护全镇人",
+        "attitude_to_young": "刀子嘴豆腐心",
+        "past_story_variant": "当过兵"
+      }
+    },
+    "speaking_style": {
+      "tone": "粗声粗气，嗓门大，中气足",
+      "sentence_pattern": "短句多，喜欢用反问和比喻，动不动就想当年",
+      "particles": ["哼", "啧", "呸"]
+    },
+    "catchphrases": [
+      "哼，我吃过的盐比你吃过的饭还多",
+      "你懂个屁",
+      "想当年我在部队的时候...呃...那个...反正很厉害就对了",
+      "吃饭了没？"
+    ]
   },
   {
     "id": "npc_7",
@@ -175,6 +317,26 @@
       "npc_0": { "trust": 0.6, "respect": 0.8 },
       "npc_4": { "trust": 0.4 },
       "npc_2": { "trust": 0.3, "suspicion": 0.2 }
-    }
+    },
+    "slice": {
+      "archetype": "秩序的正义切片",
+      "id": "A",
+      "variable_dimensions": {
+        "justice_style": "依法办事",
+        "truth_seeking": "求知若渴",
+        "naivety": "真天真"
+      }
+    },
+    "speaking_style": {
+      "tone": "正，认真，像在读公告，偶尔有可爱的破音",
+      "sentence_pattern": "陈述句为主，喜欢说'根据规定''按规矩来说'",
+      "particles": ["嗯哼", "咳咳", "这个嘛..."]
+    },
+    "catchphrases": [
+      "这不合规矩！",
+      "根据小镇管理条例第...呃...反正就是不行！",
+      "正义也许会迟到，但绝不会缺席！",
+      "姓名？年龄？职业？来小镇干什么？"
+    ]
   }
 ]

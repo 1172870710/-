@@ -2,34 +2,29 @@ extends CharacterBody2D
 class_name Player
 
 # ============================================
-# 可操控角色 — 占位版
-# WASD / 方向键移动，占位为彩色矩形
+# 可操控角色 — 波风水门
+# WASD / 方向键移动，AnimatedSprite2D 播放序列帧
+# 节点结构仿照 NPC 场景（OcadNpc/Shadow/AnimatedSprite2D）
 # ============================================
 
 @export var speed: float = 160.0
 
-# 占位精灵
-var _sprite: ColorRect
+@onready var _animated_sprite: AnimatedSprite2D = $OcadNpc/AnimatedSprite2D
+
+# 当前朝向（用于 idle 时恢复）
+var _last_dir: Vector2 = Vector2.DOWN
+
 
 func _ready() -> void:
-	# 创建占位精灵（32×32 蓝色方块）
-	_sprite = ColorRect.new()
-	_sprite.color = Color(0.2, 0.5, 0.9)
-	_sprite.size = Vector2(28, 28)
-	_sprite.position = Vector2(-14, -14)
-	add_child(_sprite)
+	add_to_group("player")
+	_animated_sprite.play("idledown")
 
-	# 碰撞检测体
-	var shape: CollisionShape2D = CollisionShape2D.new()
-	var rect: RectangleShape2D = RectangleShape2D.new()
-	rect.size = Vector2(24, 24)
-	shape.shape = rect
-	add_child(shape)
 
 func _physics_process(_delta: float) -> void:
 	# 对话中锁定移动
 	if GameNPC.any_conversation_active:
 		velocity = Vector2.ZERO
+		_animated_sprite.play("idle" + _dir_to_suffix(_last_dir))
 		return
 
 	var dir: Vector2 = Vector2.ZERO
@@ -49,3 +44,33 @@ func _physics_process(_delta: float) -> void:
 
 	velocity = dir * speed
 	move_and_slide()
+
+	# 更新动画
+	if dir == Vector2.ZERO:
+		var anim: String = "idle" + _dir_to_suffix(_last_dir)
+		if _animated_sprite.sprite_frames.has_animation(anim):
+			_animated_sprite.play(anim)
+	else:
+		_last_dir = dir
+		var anim: String = "walk" + _dir_to_suffix(dir)
+		if _animated_sprite.sprite_frames.has_animation(anim):
+			_animated_sprite.play(anim)
+
+	# 左右翻转（精灵只有朝左的帧，朝右时水平翻转）
+	if dir.x > 0:
+		_animated_sprite.flip_h = true
+	elif dir.x < 0:
+		_animated_sprite.flip_h = false
+	elif _last_dir.x > 0:
+		_animated_sprite.flip_h = true
+	else:
+		_animated_sprite.flip_h = false
+
+
+# 将方向向量转为动画名后缀（匹配 NPC SpriteFrames 命名）
+func _dir_to_suffix(d: Vector2) -> String:
+	if abs(d.x) > abs(d.y):
+		return "L"  # 左/右都用 L（通过 flip_h 区分）
+	elif abs(d.y) > 0:
+		return "down" if d.y > 0 else "up"
+	return "down"
